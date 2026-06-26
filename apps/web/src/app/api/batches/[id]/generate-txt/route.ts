@@ -28,22 +28,32 @@ export async function POST(_request: Request, { params }: RouteParams): Promise<
       return NextResponse.json({ error: 'Batch not found' }, { status: 404 })
     }
 
-    const { data: entries } = await supabase
+    const { data: entries, error: entriesError } = await supabase
       .from('entries')
-      .select('id, entry_number, date, description')
+      .select('id, entry_number, entry_date, concept')
       .eq('batch_id', id)
+      .eq('company_id', company.companyId)
       .order('entry_number', { ascending: true })
+
+    if (entriesError) {
+      return NextResponse.json({ error: 'Failed to load batch entries' }, { status: 500 })
+    }
 
     const entryIds = (entries ?? []).map((e) => e.id)
 
-    const { data: entryLines } =
+    const { data: entryLines, error: entryLinesError } =
       entryIds.length > 0
         ? await supabase
             .from('entry_lines')
             .select('entry_id, account_code, concept, debit, credit')
             .in('entry_id', entryIds)
+            .eq('company_id', company.companyId)
             .order('id', { ascending: true })
-        : { data: [] }
+        : { data: [], error: null }
+
+    if (entryLinesError) {
+      return NextResponse.json({ error: 'Failed to load batch entry lines' }, { status: 500 })
+    }
 
     const { data: accounts } = await supabase
       .from('accounts')
@@ -62,7 +72,7 @@ export async function POST(_request: Request, { params }: RouteParams): Promise<
       const entry = entries?.find((e) => e.id === line.entry_id)
       return {
         entryNumber: entry?.entry_number ?? 0,
-        date: entry?.date ?? new Date().toISOString(),
+        date: entry?.entry_date ?? new Date().toISOString(),
         accountCode: line.account_code,
         concept: line.concept,
         debit: line.debit,

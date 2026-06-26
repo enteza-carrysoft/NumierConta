@@ -39,7 +39,7 @@ export async function runEtlAction(_prevState: RunEtlState, formData: FormData):
     const data = await res.json().catch(() => ({}))
 
     if (!res.ok) {
-      return { error: data.error ?? `Error ${res.status}` }
+      return { error: extractErrorMessage(data, res.status) }
     }
 
     revalidatePath('/batches')
@@ -48,6 +48,26 @@ export async function runEtlAction(_prevState: RunEtlState, formData: FormData):
   } catch (err) {
     return { error: err instanceof Error ? err.message : 'Error desconocido' }
   }
+}
+
+function extractErrorMessage(data: unknown, status: number): string {
+  if (
+    typeof data === 'object' &&
+    data !== null &&
+    'error' in data &&
+    typeof data.error === 'object' &&
+    data.error !== null &&
+    'message' in data.error &&
+    typeof data.error.message === 'string'
+  ) {
+    return data.error.message
+  }
+
+  if (typeof data === 'object' && data !== null && 'error' in data && typeof data.error === 'string') {
+    return data.error
+  }
+
+  return `Error ${status}`
 }
 
 function defaultPeriodFrom(): string {

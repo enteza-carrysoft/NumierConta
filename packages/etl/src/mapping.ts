@@ -66,7 +66,9 @@ export function resolveExpenseAccount(
   rules: MappingRule[],
   categoryId: string | null
 ): string {
-  const rule = findRule(rules, 'expense_category', categoryId ?? 'DEFAULT')
+  const rule =
+    (categoryId ? findRule(rules, 'expense_category', categoryId) : undefined) ??
+    findRule(rules, 'expense_category', 'DEFAULT')
   if (!rule?.debit_account) {
     throw new Error(`No expense account mapping for category ${categoryId}`)
   }

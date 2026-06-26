@@ -65,6 +65,17 @@ const suppliers: StgSupplier[] = [
 
 const accounts: Account[] = [
   {
+    id: 'a0',
+    company_id: 'c1',
+    code: '60000001',
+    title: 'Compras mercaderias',
+    nif: null,
+    vat_type: null,
+    vat_rate: null,
+    surcharge_rate: null,
+    account_class: 'expense',
+  },
+  {
     id: 'a1',
     company_id: 'c1',
     code: '47200002',
@@ -108,6 +119,21 @@ describe('buildExpenseEntry', () => {
     )
     expect(entry.lines).toContainEqual(
       expect.objectContaining({ account_code: '40000007', credit: 352, vat_invoice_type: 'R' })
+    )
+  })
+
+  it('usa una cuenta de gasto por defecto si no hay regla de mapeo', () => {
+    const entry = buildExpenseEntry({
+      expense: { ...expense, supplier_id: 999 },
+      lines,
+      rules: rules.filter((rule) => rule.rule_type !== 'expense_category'),
+      suppliers: [],
+      accounts,
+      classiccontaDigits: 8,
+    })
+
+    expect(entry.lines).toContainEqual(
+      expect.objectContaining({ account_code: '60000001', debit: 320, vat_invoice_type: 'R' })
     )
   })
 })

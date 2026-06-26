@@ -15,6 +15,7 @@ export interface BuildExpenseEntryInput {
 
 export function buildExpenseEntry(input: BuildExpenseEntryInput): EntryDraft {
   const { expense, lines, rules, suppliers, accounts, classiccontaDigits } = input
+  const supplier = suppliers.find((item) => item.numier_con_id === expense.supplier_id)
 
   const concept = `FRA ${expense.invoice_ref ?? expense.numier_gac_id}`
   const entryLines: EntryLineDraft[] = []
@@ -28,7 +29,7 @@ export function buildExpenseEntry(input: BuildExpenseEntryInput): EntryDraft {
     const quota = round2(base * (rate / 100))
 
     entryLines.push({
-      account_code: resolveExpenseAccount(rules, String(expense.supplier_id ?? 'DEFAULT')),
+      account_code: resolveExpenseDebitAccount(rules, accounts, supplier),
       concept: `${concept} MP`,
       debit: base,
       credit: 0,
@@ -73,6 +74,28 @@ export function buildExpenseEntry(input: BuildExpenseEntryInput): EntryDraft {
     source_ref: String(expense.numier_gac_id),
     lines: adjustedLines,
     balanced: balance.balanced,
+  }
+}
+
+function resolveExpenseDebitAccount(
+  rules: MappingRule[],
+  accounts: Account[],
+  supplier?: StgSupplier
+): string {
+  const categoryKey = supplier?.category_id !== null && supplier?.category_id !== undefined
+    ? String(supplier.category_id)
+    : supplier?.numier_con_id !== null && supplier?.numier_con_id !== undefined
+      ? String(supplier.numier_con_id)
+      : 'DEFAULT'
+
+  try {
+    return resolveExpenseAccount(rules, categoryKey)
+  } catch {
+    const fallbackAccount = accounts.find((account) => account.account_class === 'expense')
+    if (fallbackAccount?.code) {
+      return fallbackAccount.code
+    }
+    throw new Error(`No expense account mapping for category ${categoryKey}`)
   }
 }
 
