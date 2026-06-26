@@ -1,0 +1,15 @@
+{
+  "name": "numierconta-gateway",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --filter web dev",
+    "build": "pnpm --filter web build",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "lint": "pnpm --filter web lint"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0"
+  }
+}

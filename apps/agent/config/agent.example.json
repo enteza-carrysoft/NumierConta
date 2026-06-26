@@ -1,0 +1,9 @@
+{
+  "numierDataPath": "C:\\Numier\\Datos",
+  "apiBaseUrl": "https://app.numierconta.com",
+  "agentApiKey": "your_agent_api_key_here",
+  "pollSeconds": 60,
+  "masterSyncSeconds": 3600,
+  "logLevel": "info",
+  "stateFilePath": "./data/agent-state.json"
+}

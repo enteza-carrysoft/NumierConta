@@ -1,0 +1,23 @@
+{
+  "name": "agent",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "package": "pkg . --targets node18-win-x86 --output dist/numierconta-agent.exe"
+  },
+  "dependencies": {
+    "@numierconta/shared": "workspace:*",
+    "node-adodb": "^5.0.3"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "@types/node": "^22.0.0",
+    "pkg": "^5.8.1",
+    "vitest": "^2.1.0"
+  },
+  "bin": "dist/index.js"
+}
